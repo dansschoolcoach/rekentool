@@ -1,0 +1,48 @@
+Breid de bestaande Cijfers-module van de BYB-webapp uit met een import-functie voor stamgegevens via Excel. Dit is een uitbreiding op wat er al staat, dus bouw voort op de bestaande datamodellen voor Docenten en voor Abonnementen & rittenkaarten (dezelfde velden, dezelfde tabellen als de handmatige invoerformulieren) — een import moet exact dezelfde gegevens opleveren als wanneer een school het via het webformulier had ingevoerd, zodat een school daarna gewoon verder kan met de gewone formulieren om iets aan te passen.
+
+Bouw dit onderdeel volledig en degelijk af zoals hieronder beschreven. Locaties en Rooster horen hier nog niet bij, dat is bewust uitgesteld tot een latere stap omdat Rooster verwijst naar Docenten en Locaties. Bouw dus alleen import voor Docenten en voor Abonnementen & rittenkaarten.
+
+CONTEXT
+Scholen met veel lessen en veel abonnementstypes vinden het handmatige invoerformulier te omslachtig. Ze krijgen daarom van Ninny een kant-en-klaar Excel-sjabloon om in te vullen, sturen dat terug naar Ninny, en Ninny uploadt het namens hen. Er is dus geen self-service upload voor klanten, alleen voor de admin (Ninny).
+
+WAAR DIT KOMT
+In het Beheer-gedeelte, alleen zichtbaar en bruikbaar voor de admin-rol. Voeg een sectie "Stamgegevens importeren" toe waar de admin eerst een school selecteert uit de bestaande lijst van scholen, en daarna kiest tussen twee losse import-acties:
+1. Docenten importeren
+2. Abonnementen & rittenkaarten importeren
+
+Dit zijn twee volledig gescheiden uploads met eigen bestand, eigen validatie en eigen bevestiging. Koppel ze niet aan elkaar.
+
+BESTANDSEISEN — DOCENTEN
+Verwacht een .xlsx-bestand met een tabblad met exact de naam "Docenten" (vergelijk zonder hoofdlettergevoeligheid en zonder spaties aan begin/eind, voor het geval iemand per ongeluk een spatie toevoegt). Andere tabbladen in het bestand, zoals "Instructies", worden genegeerd.
+Kolommen in rij 1 (header): Naam docent, Uurtarief (€), Reiskosten per week (€).
+Elke rij daarna is een docent. Sla rijen over die volledig leeg zijn.
+
+BESTANDSEISEN — ABONNEMENTEN & RITTENKAARTEN
+Verwacht een .xlsx-bestand met twee tabbladen: "Abonnementen" en "Rittenkaarten" (zelfde ongevoelige matching als hierboven). Tabblad "Instructies" wordt genegeerd.
+Kolommen tabblad Abonnementen: Naam, Doelgroep, Betaalwijze, Prijs per maand (€), Looptijd in maanden, Btw-tarief.
+Kolommen tabblad Rittenkaarten: Naam, Doelgroep, Kaartprijs (€), Aantal ritten, Geldig in maanden (leeg = onbeperkt), Btw-tarief.
+Elke abonnement-rij wordt opgeslagen met Soort = Abonnement, elke rittenkaart-rij met Soort = Rittenkaart, zodat het resultaat identiek is aan wat het webformulier oplevert. Sla rijen over die volledig leeg zijn.
+
+VALIDATIE VOORDAT ER IETS WORDT OPGESLAGEN
+Valideer altijd eerst het hele bestand, en sla pas iets op nadat de admin het overzicht heeft bevestigd (zie hieronder). Toon één duidelijke, overzichtelijke foutmelding met daarin alle gevonden problemen tegelijk, niet één voor één. Controleer:
+- Bestandstype is .xlsx.
+- Verplichte tabbladen zijn aanwezig (voor Docenten: "Docenten"; voor Abonnementen: zowel "Abonnementen" als "Rittenkaarten").
+- Headers in rij 1 komen overeen met de verwachte kolomnamen.
+- Naam-velden zijn niet leeg.
+- Numerieke velden (Uurtarief, Reiskosten per week, Prijs per maand, Looptijd in maanden, Kaartprijs, Aantal ritten, Geldig in maanden) zijn getallen en niet negatief.
+- Doelgroep is exact "Jeugd" of "Volwassen".
+- Betaalwijze is exact een van: Per maand, Per 4 weken, Per kwartaal, Per halfjaar, Per jaar, In termijnen.
+- Btw-tarief is exact een van: 0% btw, 9% btw, 21% btw.
+Bij een validatiefout wordt er niets opgeslagen, ook niet gedeeltelijk. De admin past het bestand aan en probeert opnieuw.
+
+OVERZICHTSSCHERM VOOR BEVESTIGING
+Als het bestand geldig is, toon dan een overzichtstabel van alles wat ingelezen gaat worden, exact zoals het straks in de app komt te staan, inclusief het totaal aantal rijen. Zet daarboven een duidelijke, opvallende waarschuwing dat dit de volledige bestaande lijst (Docenten, of Abonnementen & rittenkaarten) van deze school vervangt, niet aanvult. Vermeld ook hoeveel bestaande records er nu voor deze school staan, zodat de admin een indicatie heeft van wat er verdwijnt. Pas na een expliciete bevestigingsknop ("Ja, vervang de lijst") wordt er echt opgeslagen; een annuleerknop moet altijd terug kunnen zonder dat er iets verandert.
+
+NA BEVESTIGEN
+Vervang voor de geselecteerde school de volledige bestaande set (Docenten, of Abonnementen & rittenkaarten) door de nieuw ingelezen data. Toon daarna een duidelijke bevestiging met het aantal geïmporteerde records.
+
+STIJL
+Zelfde navy/goud-stijl en dezelfde componenten als de rest van Beheer en de Cijfers-module. Geen aparte look-and-feel voor dit onderdeel.
+
+WAT NIET TE BOUWEN
+Geen CSV-ondersteuning, alleen .xlsx. Geen samenvoeg-logica (merge) tussen bestaand en nieuw, alleen volledig vervangen. Geen self-service upload voor scholen zelf. Geen import voor Locaties of Rooster, dat komt later.
