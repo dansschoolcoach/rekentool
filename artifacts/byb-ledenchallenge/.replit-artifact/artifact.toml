@@ -1,0 +1,29 @@
+kind = "web"
+previewPath = "/"
+title = "ByB Ledenchallenge"
+description = "A focused challenge portal for dance school owners to enter weekly trial-lesson results, track funnel performance, and compete on a percentage-based leaderboard, with a separate admin workspace for participant and challenge management."
+version = "1.0.0"
+id = "artifacts/byb-ledenchallenge"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24878
+
+[services.development]
+run = "pnpm --filter @workspace/byb-ledenchallenge run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/byb-ledenchallenge", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/byb-ledenchallenge/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24878"
+BASE_PATH = "/"
+VITE_PUBLIC_APP_URL = "https://byb.ninnydooms.nl"
