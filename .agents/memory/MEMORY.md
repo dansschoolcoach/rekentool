@@ -1,0 +1,20 @@
+- [Orval Zod compatibility](orval-zod-compatibility.md) — generator emits Zod 4 helpers while this workspace catalog still resolves Zod 3.
+- [Orval Node exports](orval-node-exports.md) — codegen can restore extensionless Zod barrel exports that Node 24 cannot load in direct tests.
+- [Participant access](participant-access.md) — participants self-register only after their verified email is allowlisted in Beheer; do not restore invitation tickets.
+- [Admin participant management](admin-participant-inspection.md) — admin changes use explicit participant-scoped routes, never Clerk impersonation or participant hooks.
+- [Financial history](financial-history.md) — saved financial months must keep the master data that applied when they were saved.
+- [Lesson revenue allocation](lesson-revenue-allocation.md) — allocate real monthly contribution revenue across occupied lesson places; never count one subscription as full revenue per class.
+- [Season-wide location rent](season-location-rent.md) — monthly venue contracts are spread across all scheduled season lessons, while saved-month allocations remain immutable.
+- [Financial month concurrency](financial-month-concurrency.md) — month saves use the read revision; clients must adopt the returned revision after every successful save.
+- [Participant deletion compensation](participant-deletion-compensation.md) — if Clerk deletion succeeds but PostgreSQL rolls back, release the stale identity link for safe recovery.
+- [Calendar-year tax estimates](calendar-year-tax-estimates.md) — aggregate saved months across seasons; preliminary payments belong to a participant year, not a financial month.
+- [Financial offer imports](financial-offer-imports.md) — Excel monthly prices must be converted to the existing form's payment-period semantics.
+- [Cross-runtime whitespace validation](cross-runtime-whitespace-validation.md) — PostgreSQL whitespace classes and btrim do not match JavaScript trim; use an explicit shared character set.
+- [Participant profile concurrency](participant-profile-concurrency.md) — use an integer revision for optimistic locking; database timestamps lose precision when round-tripped through JavaScript.
+- [Financial VAT input](financial-vat-input.md) — users enter revenue and ordinary costs including VAT; salary and tax-payment fields remain explicitly outside that convention.
+- [Published-release smoke checks](published-release-smoke-checks.md) — static artifact builds precede publication; live URL checks require a successful post-deployment event.
+- [GitHub branch protection API access](github-branch-protection-check.md) — branch protection reads need a GitHub App or fine-grained Administration: Read token, not standard GITHUB_TOKEN.
+- [ExcelJS row values](exceljs-row-values.md) — assign imported worksheet cells individually in tests; Row.values arrays can shift unexpectedly after an XLSX round trip.
+- [App browser fixtures](contrast-browser-fixtures.md) — importing the full app in isolated browser tests needs local Clerk aliases and a test public app URL.
+- [Profile save navigation](onboarding-profile-cache.md) — update the guarded dashboard cache from a successful profile mutation before navigating away from onboarding.
+- [Profile preference query isolation](profile-preference-query-isolation.md) — user-scoped preferences need participant-aware client cache keys to reject late cross-participant responses.
