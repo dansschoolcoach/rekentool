@@ -1,0 +1,45 @@
+Breid de Cijfers-module verder uit met een derde import-onderdeel: Rooster. Dit bouwt voort op de al bestaande import van Docenten en van Abonnementen & rittenkaarten, en op het bestaande datamodel achter het handmatige Rooster-formulier (Naam les, Docent, Locatie, Dag, Tijd, Minuten, Actief vanaf, Actief tot). Een geïmporteerd rooster moet exact dezelfde gegevens opleveren als wanneer een school het via het bestaande webformulier had ingevoerd.
+
+Rooster is anders dan de vorige twee imports, omdat Docent en Locatie per school verschillen en exact moeten matchen met wat al voor die school is vastgelegd. Daarom is er geen vast, generiek sjabloon zoals bij Docenten en Abonnementen, maar genereert de app het sjabloon per school, op het moment dat de admin erom vraagt.
+
+WAAR DIT KOMT
+In dezelfde sectie "Stamgegevens importeren" in Beheer, als derde optie naast Docenten en Abonnementen & rittenkaarten, voor de admin-rol. Bij de geselecteerde school:
+1. Eerst een knop "Rooster-sjabloon downloaden".
+2. Daarna een upload-actie "Rooster importeren" voor het ingevulde bestand.
+
+VOORWAARDE VOOR HET GENEREREN VAN HET SJABLOON
+Het sjabloon kan alleen gegenereerd worden als de geselecteerde school al minstens één docent en minstens één locatie heeft (ongeacht of die handmatig zijn ingevoerd of geïmporteerd). Is dat niet het geval, toon dan geen leeg of onbruikbaar sjabloon, maar een duidelijke melding: "Voer eerst docenten en locaties in voor deze school voordat je een roostersjabloon kunt genereren."
+
+HET GEGENEREERDE SJABLOON
+Een .xlsx-bestand met een tabblad "Instructies" (zelfde soort korte uitleg als bij de vorige twee sjablonen: wat je waar invult, dat de eerste grijze/cursieve rij een voorbeeld is, en dat het bestand teruggestuurd moet worden naar Ninny) en een tabblad "Rooster" met kolommen: Naam les, Docent, Locatie, Dag, Tijd, Minuten, Actief vanaf, Actief tot. Voeg één grijze/cursieve voorbeeldrij toe met realistische waarden.
+
+Zet afdwingende keuzelijsten (dezelfde stricte lijst-validatie als bij Doelgroep, Betaalwijze en Btw-tarief in het Abonnementen-sjabloon, die typefouten blokkeert) op:
+- Docent: gevuld met de actuele docentnamen van deze school, plus dezelfde "Geen (Zelf)"-optie die het bestaande handmatige Rooster-formulier ook al gebruikt voor als de schoolhouder zelf lesgeeft.
+- Locatie: gevuld met de actuele locatienamen van deze school, met exact dezelfde opties (inclusief eventuele bijzondere waarden) als het bestaande handmatige formulier daar gebruikt.
+- Dag: exact dezelfde vaste lijst van dagen die het bestaande handmatige Rooster-formulier al gebruikt.
+Bouw deze drie lijsten dus niet opnieuw met aannames, maar hergebruik letterlijk dezelfde databron en dezelfde opties die het handmatige formulier al aanroept, zodat ze nooit uit de pas kunnen lopen.
+
+VALIDATIE BIJ IMPORT
+Valideer het hele bestand voordat er iets wordt opgeslagen, en toon alle gevonden problemen in één keer, niet één voor één:
+- Bestandstype is .xlsx en tabblad "Rooster" is aanwezig met de juiste headers.
+- Naam les is niet leeg.
+- Docent is óf "Geen (Zelf)" óf komt exact overeen met een bestaande docent van deze school. Is dat niet zo, meld dan expliciet welke naam niet gevonden kon worden.
+- Locatie komt exact overeen met een bestaande locatie van deze school, anders dezelfde expliciete foutmelding met de naam die niet klopt.
+- Dag is een geldige waarde uit de vaste dagenlijst.
+- Tijd is een geldige tijdnotatie.
+- Minuten is een positief getal.
+- Actief vanaf en Actief tot zijn beide geldige datums, en Actief vanaf ligt niet na Actief tot.
+- Sla rijen over die volledig leeg zijn.
+Bij een validatiefout wordt er niets opgeslagen, ook niet gedeeltelijk.
+
+OVERZICHTSSCHERM VOOR BEVESTIGING
+Zelfde patroon als bij de vorige twee imports: toon een overzichtstabel van alle in te lezen lessen, met een opvallende waarschuwing dat dit het volledige bestaande rooster van deze school vervangt, niet aanvult, plus het huidige aantal lessen dat nu voor deze school staat. Pas na expliciete bevestiging wordt er echt opgeslagen; een annuleerknop moet altijd terug kunnen zonder dat er iets verandert.
+
+NA BEVESTIGEN
+Vervang voor de geselecteerde school het volledige bestaande rooster door de nieuw ingelezen lessen. Toon daarna een bevestiging met het aantal geïmporteerde lessen.
+
+STIJL
+Zelfde navy/goud-stijl en dezelfde componenten als de rest van Beheer en de Cijfers-module.
+
+WAT NIET TE BOUWEN
+Geen CSV-ondersteuning, alleen .xlsx. Geen samenvoeg-logica, alleen volledig vervangen. Geen self-service upload voor scholen zelf.
