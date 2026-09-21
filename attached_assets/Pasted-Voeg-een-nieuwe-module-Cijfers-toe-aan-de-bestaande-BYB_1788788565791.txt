@@ -1,0 +1,39 @@
+Voeg een nieuwe module "Cijfers" toe aan de bestaande BYB-webapp, naast de al gebouwde Ledenchallenge. Zelfde inlog, zelfde navy/goud stijl, zelfde onderscheid tussen deelnemer en admin. Dit is een eerste testversie om uit te proberen bij een of enkele dansscholen, dus bouw hem overzichtelijk en licht, niet compleet.
+
+BELANGRIJK VERSCHIL MET DE LEDENCHALLENGE
+De Ledenchallenge-data is openbaar en competitief. De Cijfers-data is strikt privé per dansschool: een deelnemer ziet alleen haar eigen cijfers, nooit die van een andere school. De admin (ik) kan in het beheerpaneel wel bij alle scholen de cijfers inzien, voor coachingsdoeleinden.
+
+1. STAMGEGEVENS PER SEIZOEN (eenmalig ingevuld bij de start, aan te passen wanneer nodig)
+Per dansschool kan de deelnemer instellen:
+- Docenten: naam en uurtarief.
+- Locaties: naam en zaalhuur per uur.
+- Lesrooster: per les de lesdag, starttijd, aantal minuten, naam van de les, gekoppelde docent, gekoppelde locatie.
+- Gemiddeld contributiebedrag per lid per les (één getal, wordt alleen gebruikt om bij een ingevulde opkomst een indicatieve omzet per les te berekenen, geen boekhoudkundige precisie nodig).
+- Land (Nederland/België, dit veld bestaat al voor de Ledenchallenge, hergebruik hetzelfde veld) en of er recht is op startersaftrek (ja/nee, alleen relevant voor Nederland).
+- Gewenst maandsalaris (één bedrag, geldt als standaard voor elke maand, per maand overschrijfbaar).
+
+Bereken de kosten per les volledig automatisch: kosten per les = (uurtarief docent + uurtarief locatie) / 60 x aantal minuten. Bereken ook automatisch hoe vaak die les in een gegeven maand voorkomt, op basis van de lesdag en de kalender van die maand (dus hoeveel maandagen zitten er in september), zodat hier nergens handmatig een aantal lessen per maand hoeft te worden ingevuld zoals in de oude Excel. Sta wel toe dat een deelnemer dit automatische aantal per les per maand kan overschrijven, voor uitzonderingen zoals een vakantie of een uitgevallen les.
+
+2. MAANDELIJKSE INVOER (licht, per maand)
+- Vaste kosten: een lijst met kostencategorieën en bedragen. Bij een nieuwe maand worden de bedragen van de vorige maand automatisch voorgesteld, de deelnemer hoeft alleen te wijzigen wat anders is, in plaats van alles opnieuw in te typen. Nieuwe categorieën kunnen altijd toegevoegd worden.
+- Extra activiteiten: losse items per maand met een naam en een bedrag (bijvoorbeeld sponsoring, inschrijfkosten, wedstrijdbijdrage).
+- Contributie-omzet: één totaalbedrag, "hoeveel contributie is deze maand binnengekomen." Dit is verplicht en het enige omzetgetal dat nodig is voor de winstberekening.
+- Opkomst per les (optioneel): bij elke les in het rooster kan de deelnemer een aantal aanwezige leden invullen voor die maand. Dit is puur optioneel en wordt alleen gebruikt voor het lessenoverzicht hieronder, niet voor de officiële omzetberekening.
+- Belasting-achterstand (optioneel): een eenmalig in te vullen bedrag als er al een achterstand is vanuit een eerdere periode, net als in de oude Excel.
+
+3. AUTOMATISCHE BEREKENINGEN
+Reken per maand automatisch uit: totale kosten (vaste kosten + kosten van alle lessen die maand), totale omzet (contributie + extra activiteiten), brutowinst (omzet - kosten), belastingreservering, nettowinst (brutowinst - belastingreservering), en banksaldo na salaris (cumulatief: vorige maand + nettowinst deze maand - gewenst salaris - eventuele belasting-achterstand).
+
+Gebruik voor de belastingreservering exact deze formules, gebaseerd op de cumulatieve jaarwinst tot en met die maand:
+
+Voor Nederland: zelfstandigenaftrek is -2470, startersaftrek is -2123 als van toepassing anders 0, MKB-winstvrijstelling is het minimum van 0 en -(winst + zelfstandigenaftrek + startersaftrek) x 12,7%, belastbaar inkomen box 1 is het maximum van 0 en (winst + zelfstandigenaftrek + startersaftrek + MKB-winstvrijstelling). Belasting box 1 is het minimum van 76817 en belastbaar inkomen x 36,64%, plus het maximum van 0 en (belastbaar inkomen - 76817) x 49,5%. Algemene heffingskorting: als belastbaar inkomen tussen 0 en 24813 dan -3362, als tussen 24818 en 75518 dan -(3362 - 6,63% x (belastbaar inkomen - 24812)), anders 0. Arbeidskorting op basis van de winst uit onderneming (vóór aftrekposten): onder 11491 is dat 8,425% x winst, tussen 11491 en 24821 is dat 968 + 31,433% x (winst - 11490), tussen 24821 en 39958 is dat 5158 + 2,471% x (winst - 24820), tussen 39958 en 124935 is dat 5532 - 6,51% x (winst - 39958), daarboven 0, en trek dit bedrag af. Verschuldigde inkomstenbelasting is het maximum van 0 en (belasting box 1 + heffingskorting + arbeidskorting). Zvw-bijdrage is het minimum van 71628 en belastbaar inkomen x 5,32%. Totaal te reserveren is verschuldigde inkomstenbelasting + Zvw-bijdrage, uitgedrukt als percentage van de winst, en dat percentage per maand toepassen op de winst van die maand.
+
+Voor België: sociale bijdrage is gestaffeld op de winst, onder 16861,46 is dat 898,28 x 4, tussen 16861,46 en 72810,95 is dat 20,5% van de winst, tussen 72810,95 en 107300,3 is dat 14,16% van de winst, daarboven 5148,1 x 4. Belastbaar inkomen is het maximum van 0 en (winst - sociale bijdrage). Schijf 1 is het minimum van belastbaar inkomen en 15200 x 25%. Schijf 2 is het maximum van 0 en (het minimum van belastbaar inkomen en 26830, min 15200) x 40%. Schijf 3 is het maximum van 0 en (het minimum van belastbaar inkomen en 46440, min 26830) x 45%. Schijf 4 is het maximum van 0 en (belastbaar inkomen - 46440) x 50%. Belastingvrije som is, als belastbaar inkomen 10160 of hoger is, -10160 x 25%, anders 0. Totaal te reserveren is de som van schijf 1 tot en met 4, plus sociale bijdrage, plus belastingvrije som, uitgedrukt als percentage van de winst.
+
+Vermeld ergens zichtbaar (bijvoorbeeld in de instellingen of als kleine toelichting) dat dit een inschatting is op basis van de belastingtarieven van 2025 en dat dit jaarlijks bijgewerkt moet worden.
+
+4. DASHBOARD
+Bouw een maandoverzicht in dezelfde kaartenstijl als de rest van de app: omzet, kosten, brutowinst, gereserveerde belasting, nettowinst, salaris en banksaldo, met een cumulatief seizoensoverzicht eronder (optelling van alle ingevulde maanden). Als er voor een maand opkomst per les is ingevuld, toon dan een los lessenoverzicht gesorteerd op geschatte winst per les (opkomst x gemiddeld tarief per lid, min de automatisch berekende kosten van die les), met een simpel visueel signaal voor lessen die er negatief uitspringen, zodat in één oogopslag duidelijk is welke les aandacht nodig heeft.
+
+5. WAT NIET IN DEZE VERSIE
+Geen tarieven-catalogus met losse abonnementstypes, geen registratie van welke leden met welk abonnement in welke les zitten, geen koppeling met externe ledenadministraties zoals StudioCloud of Bueno. Dat komt in een latere fase. Laat de bestaande Ledenchallenge-module en -data volledig ongewijzigd.
