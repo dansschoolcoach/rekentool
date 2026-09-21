@@ -1,0 +1,1538 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API for the ByB Ledenchallenge participant portal
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: challenge
+    description: Challenge settings and participant data
+  - name: financial
+    description: Private financial school dashboard
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /challenge:
+    get:
+      operationId: getChallenge
+      tags: [challenge]
+      summary: Get the active challenge
+      responses:
+        "200":
+          description: Active challenge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Challenge"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [challenge]
+      summary: Get the current user's dashboard
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [challenge]
+      summary: Get the challenge leaderboard
+      responses:
+        "200":
+          description: Leaderboard entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+  /weeks:
+    get:
+      operationId: getWeeks
+      tags: [challenge]
+      summary: Get the calculated challenge weeks
+      responses:
+        "200":
+          description: Calculated weeks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChallengeWeek"
+  /weekly-entries:
+    get:
+      operationId: getWeeklyEntries
+      tags: [challenge]
+      summary: Get the current user's weekly entries
+      responses:
+        "200":
+          description: Weekly entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WeeklyEntry"
+    post:
+      operationId: upsertWeeklyEntry
+      tags: [challenge]
+      summary: Create or update one weekly entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WeeklyEntryInput"
+      responses:
+        "200":
+          description: Saved weekly entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklyEntry"
+  /profile:
+    patch:
+      operationId: updateProfile
+      tags: [challenge]
+      summary: Update the current user's participant profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated participant profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+  /profile/preferences:
+    get:
+      operationId: getProfilePreferences
+      tags: [challenge]
+      summary: Get the current participant's interface preferences
+      responses:
+        "200":
+          description: Current participant preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilePreferences"
+    patch:
+      operationId: updateProfilePreferences
+      tags: [challenge]
+      summary: Update the current participant's interface preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfilePreferencesUpdate"
+      responses:
+        "200":
+          description: Updated participant preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilePreferences"
+  /messages:
+    get:
+      operationId: getMessages
+      tags: [challenge]
+      summary: Get coach messages for the current participant
+      responses:
+        "200":
+          description: Messages for the current participant
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CoachMessage"
+  /admin/participants:
+    get:
+      operationId: getParticipants
+      tags: [challenge]
+      summary: List all participants for the admin
+      responses:
+        "200":
+          description: Participants with totals and scores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Participant"
+    post:
+      operationId: createParticipant
+      tags: [challenge]
+      summary: Create a participant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParticipantInput"
+      responses:
+        "201":
+          description: Created participant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+  /admin/participants/recovery-status:
+    get:
+      operationId: getParticipantRecoveryStatus
+      tags: [challenge]
+      summary: Get overdue participant account recovery records for the admin
+      responses:
+        "200":
+          description: Overdue recovery records without account identifiers or email addresses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParticipantRecoveryStatus"
+  /admin/participants/import/preview:
+    post:
+      operationId: previewParticipantImport
+      tags: [challenge]
+      summary: Validate a participant Excel file without storing participants
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ParticipantImportFileInput"
+      responses:
+        "200":
+          description: Participant import validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParticipantImportPreview"
+        "422":
+          description: Invalid participant import file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParticipantImportPreview"
+  /admin/participants/import/confirm:
+    post:
+      operationId: confirmParticipantImport
+      tags: [challenge]
+      summary: Validate and atomically import a participant Excel file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ParticipantImportFileInput"
+      responses:
+        "201":
+          description: Imported participants
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParticipantImportResult"
+        "409":
+          description: A participant email already exists
+        "422":
+          description: Invalid participant import file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParticipantImportPreview"
+  /admin/participants/{id}:
+    patch:
+      operationId: updateParticipant
+      tags: [challenge]
+      summary: Update a participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParticipantUpdate"
+      responses:
+        "200":
+          description: Updated participant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+    delete:
+      operationId: deleteParticipant
+      tags: [challenge]
+      summary: Delete a participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "204":
+          description: Participant deleted
+  /admin/participants/{id}/view:
+    get:
+      operationId: getAdminParticipantView
+      tags: [challenge]
+      summary: View a participant's challenge screen in read-only mode
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Participant-facing data for read-only admin inspection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminParticipantView"
+        "404":
+          description: Participant not found
+  /admin/participants/{id}/profile:
+    patch:
+      operationId: updateAdminParticipantProfile
+      tags: [challenge]
+      summary: Update the selected participant's participant-facing profile values
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated participant profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Participant"
+        "404":
+          description: Participant not found
+  /admin/participants/{id}/weekly-entries:
+    post:
+      operationId: upsertAdminParticipantWeeklyEntry
+      tags: [challenge]
+      summary: Create or update a weekly entry for the selected participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WeeklyEntryInput"
+      responses:
+        "200":
+          description: Saved participant weekly entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklyEntry"
+        "404":
+          description: Participant not found
+  /admin/participants/{id}/messages:
+    get:
+      operationId: getAdminParticipantMessages
+      tags: [challenge]
+      summary: Get messages for a participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Participant messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CoachMessage"
+    post:
+      operationId: createParticipantMessage
+      tags: [challenge]
+      summary: Leave a coach message for a participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Created coach message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoachMessage"
+  /admin/participants/{id}/reminder:
+    post:
+      operationId: sendParticipantReminder
+      tags: [challenge]
+      summary: Send a manual update reminder to a participant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Reminder sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailSendResult"
+  /admin/challenge:
+    patch:
+      operationId: updateChallenge
+      tags: [challenge]
+      summary: Update the active challenge dates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChallengeUpdate"
+      responses:
+        "200":
+          description: Updated challenge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Challenge"
+  /admin/weekly-entries:
+    get:
+      operationId: getAdminWeeklyEntries
+      tags: [challenge]
+      summary: Get all weekly entries for the admin
+      responses:
+        "200":
+          description: All weekly entries with participant context
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminWeeklyEntry"
+    patch:
+      operationId: updateAdminWeeklyEntry
+      tags: [challenge]
+      summary: Correct a weekly entry for the admin
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: participantId
+          in: query
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WeeklyEntryUpdate"
+      responses:
+        "200":
+          description: Corrected weekly entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminWeeklyEntry"
+  /financial/seasons:
+    get:
+      operationId: getFinancialSeasons
+      tags: [financial]
+      responses:
+        "200": { description: Financial seasons, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/FinancialSeason" } } } } }
+    post:
+      operationId: createFinancialSeason
+      tags: [financial]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSeasonInput" } } } }
+      responses:
+        "201": { description: Created season, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSeason" } } } }
+  /financial/seasons/{seasonId}:
+    get:
+      operationId: getFinancialSeason
+      tags: [financial]
+      parameters: [{ name: seasonId, in: path, required: true, schema: { type: number } }]
+      responses:
+        "200": { description: Season and settings, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSeasonDetail" } } } }
+    put:
+      operationId: updateFinancialSeason
+      tags: [financial]
+      parameters: [{ name: seasonId, in: path, required: true, schema: { type: number } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSeasonUpdateInput" } } } }
+      responses:
+        "200": { description: Saved season, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSeasonDetail" } } } }
+        "409": { description: Season was changed after the editor loaded it }
+  /financial/seasons/{seasonId}/months/{month}:
+    get:
+      operationId: getFinancialMonth
+      tags: [financial]
+      parameters: [{ name: seasonId, in: path, required: true, schema: { type: number } }, { name: month, in: path, required: true, schema: { type: string, format: date } }]
+      responses:
+        "200": { description: Calculated month, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialMonthDetail" } } } }
+    put:
+      operationId: upsertFinancialMonth
+      tags: [financial]
+      parameters: [{ name: seasonId, in: path, required: true, schema: { type: number } }, { name: month, in: path, required: true, schema: { type: string, format: date } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialMonthInput" } } } }
+      responses:
+        "200": { description: Saved calculated month, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialMonthDetail" } } } }
+  /financial/tax-years/{calendarYear}:
+    get:
+      operationId: getFinancialTaxYear
+      tags: [financial]
+      parameters: [{ name: calendarYear, in: path, required: true, schema: { type: number, minimum: 2020, maximum: 2100 } }]
+      responses:
+        "200": { description: Calendar-year tax estimate, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialTaxYearSummary" } } } }
+    put:
+      operationId: updateFinancialTaxYear
+      tags: [financial]
+      parameters: [{ name: calendarYear, in: path, required: true, schema: { type: number, minimum: 2020, maximum: 2100 } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialTaxYearInput" } } } }
+      responses:
+        "200": { description: Updated calendar-year tax estimate, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialTaxYearSummary" } } } }
+        "409": { description: Tax-year payments changed after the editor loaded them }
+  /financial/seasons/{seasonId}/file-submissions/upload:
+    post:
+      operationId: requestFinancialFileSubmissionUpload
+      tags: [financial]
+      parameters: [{ name: seasonId, in: path, required: true, schema: { type: number } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialFileSubmissionInput" } } } }
+      responses:
+        "200": { description: Tijdelijke privé-uploadlocatie, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialFileSubmissionUpload" } } } }
+  /financial/seasons/{seasonId}/file-submissions:
+    get:
+      operationId: getFinancialFileSubmissions
+      tags: [financial]
+      parameters: [{ name: seasonId, in: path, required: true, schema: { type: number } }]
+      responses:
+        "200": { description: Eigen aanleveringen voor dit seizoen, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/FinancialFileSubmission" } } } } }
+    post:
+      operationId: createFinancialFileSubmission
+      tags: [financial]
+      parameters: [{ name: seasonId, in: path, required: true, schema: { type: number } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialFileSubmissionConfirmation" } } } }
+      responses:
+        "201": { description: Bestand aan wachtrij toegevoegd zonder import, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialFileSubmission" } } } }
+  /financial/file-submissions/{submissionId}/download:
+    get:
+      operationId: downloadFinancialFileSubmission
+      tags: [financial]
+      parameters: [{ name: submissionId, in: path, required: true, schema: { type: number } }]
+      responses:
+        "200": { description: Privé Excelbestand, content: { application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: { schema: { type: string, format: binary } } } }
+  /admin/financial/file-submissions:
+    get:
+      operationId: getAdminFinancialFileSubmissions
+      tags: [financial]
+      responses:
+        "200": { description: Wachtrij van aangeleverde Excelbestanden, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/AdminFinancialFileSubmission" } } } } }
+  /admin/financial/file-submissions/{submissionId}:
+    patch:
+      operationId: updateAdminFinancialFileSubmission
+      tags: [financial]
+      parameters: [{ name: submissionId, in: path, required: true, schema: { type: number } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialFileSubmissionStatusUpdate" } } } }
+      responses:
+        "200": { description: Bijgewerkte verwerkingsstatus zonder import, content: { application/json: { schema: { $ref: "#/components/schemas/AdminFinancialFileSubmission" } } } }
+        "404": { description: Aanlevering niet gevonden }
+  /admin/financial/file-submissions/{submissionId}/download:
+    get:
+      operationId: downloadAdminFinancialFileSubmission
+      tags: [financial]
+      parameters: [{ name: submissionId, in: path, required: true, schema: { type: number } }]
+      responses:
+        "200": { description: Privé Excelbestand voor beheer, content: { application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: { schema: { type: string, format: binary } } } }
+  /admin/financial/participants/{participantId}/seasons/{seasonId}:
+    get:
+      operationId: getAdminFinancialSeason
+      tags: [financial]
+      parameters: [{ name: participantId, in: path, required: true, schema: { type: number } }, { name: seasonId, in: path, required: true, schema: { type: number } }]
+      responses:
+        "200": { description: Privately scoped coaching view, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSeasonDetail" } } } }
+    put:
+      operationId: updateAdminFinancialSeason
+      tags: [financial]
+      parameters: [{ name: participantId, in: path, required: true, schema: { type: number } }, { name: seasonId, in: path, required: true, schema: { type: number } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSeasonUpdateInput" } } } }
+      responses:
+        "200": { description: Saved season for the selected participant, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSeasonDetail" } } } }
+        "404": { description: Participant or season not found }
+        "409": { description: Season was changed after the editor loaded it }
+  /admin/financial/participants/{participantId}/seasons:
+    get:
+      operationId: getAdminFinancialSeasons
+      tags: [financial]
+      parameters:
+        - name: participantId
+          in: path
+          required: true
+          schema: { type: number }
+      responses:
+        "200":
+          description: Financial seasons for one explicitly selected participant
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FinancialSeason"
+    post:
+      operationId: createAdminFinancialSeason
+      tags: [financial]
+      parameters:
+        - name: participantId
+          in: path
+          required: true
+          schema: { type: number }
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSeasonInput" } } } }
+      responses:
+        "201": { description: Created season for the selected participant, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSeason" } } } }
+        "404": { description: Participant not found }
+  /admin/financial/participants/{participantId}/seasons/{seasonId}/months/{month}:
+    get:
+      operationId: getAdminFinancialMonth
+      tags: [financial]
+      parameters: [{ name: participantId, in: path, required: true, schema: { type: number } }, { name: seasonId, in: path, required: true, schema: { type: number } }, { name: month, in: path, required: true, schema: { type: string, format: date } }]
+      responses:
+        "200": { description: Calculated month for the selected participant, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialMonthDetail" } } } }
+        "404": { description: Participant or season not found }
+    put:
+      operationId: upsertAdminFinancialMonth
+      tags: [financial]
+      parameters: [{ name: participantId, in: path, required: true, schema: { type: number } }, { name: seasonId, in: path, required: true, schema: { type: number } }, { name: month, in: path, required: true, schema: { type: string, format: date } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialMonthInput" } } } }
+      responses:
+        "200": { description: Saved calculated month for the selected participant, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialMonthDetail" } } } }
+        "404": { description: Participant or season not found }
+        "409": { description: Month was changed after the editor loaded it }
+  /admin/financial/participants/{participantId}/tax-years/{calendarYear}:
+    get:
+      operationId: getAdminFinancialTaxYear
+      tags: [financial]
+      parameters: [{ name: participantId, in: path, required: true, schema: { type: number } }, { name: calendarYear, in: path, required: true, schema: { type: number, minimum: 2020, maximum: 2100 } }]
+      responses:
+        "200": { description: Calendar-year tax estimate for the selected participant, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialTaxYearSummary" } } } }
+        "404": { description: Participant not found }
+    put:
+      operationId: updateAdminFinancialTaxYear
+      tags: [financial]
+      parameters: [{ name: participantId, in: path, required: true, schema: { type: number } }, { name: calendarYear, in: path, required: true, schema: { type: number, minimum: 2020, maximum: 2100 } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialTaxYearInput" } } } }
+      responses:
+        "200": { description: Updated calendar-year tax estimate for the selected participant, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialTaxYearSummary" } } } }
+        "404": { description: Participant not found }
+        "409": { description: Tax-year payments changed after the editor loaded them }
+  /admin/financial/participants/{participantId}/seasons/{seasonId}/imports/teachers/preview:
+    post:
+      operationId: previewAdminFinancialTeachersImport
+      tags: [financial]
+      summary: Validate and preview a teacher XLSX import
+      parameters:
+        - { name: participantId, in: path, required: true, schema: { type: number } }
+        - { name: seasonId, in: path, required: true, schema: { type: number } }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/FinancialImportFileInput"
+      responses:
+        "200": { description: Valid teacher import preview, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialTeacherImportPreview" } } } }
+        "422": { description: Import validation errors, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialTeacherImportPreview" } } } }
+  /admin/financial/participants/{participantId}/seasons/{seasonId}/imports/subscriptions/preview:
+    post:
+      operationId: previewAdminFinancialSubscriptionsImport
+      tags: [financial]
+      summary: Validate and preview subscriptions and punch cards XLSX import
+      parameters:
+        - { name: participantId, in: path, required: true, schema: { type: number } }
+        - { name: seasonId, in: path, required: true, schema: { type: number } }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/FinancialImportFileInput"
+      responses:
+        "200": { description: Valid offer import preview, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSubscriptionImportPreview" } } } }
+        "422": { description: Import validation errors, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialSubscriptionImportPreview" } } } }
+  /admin/financial/participants/{participantId}/seasons/{seasonId}/imports/teachers/confirm:
+    post:
+      operationId: confirmAdminFinancialTeachersImport
+      tags: [financial]
+      summary: Atomically replace teachers from a validated preview
+      parameters:
+        - { name: participantId, in: path, required: true, schema: { type: number } }
+        - { name: seasonId, in: path, required: true, schema: { type: number } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinancialTeacherImportConfirm"
+      responses:
+        "200": { description: Teachers replaced, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialImportResult" } } } }
+        "409": { description: Season changed after preview }
+  /admin/financial/participants/{participantId}/seasons/{seasonId}/imports/subscriptions/confirm:
+    post:
+      operationId: confirmAdminFinancialSubscriptionsImport
+      tags: [financial]
+      summary: Atomically replace subscriptions and punch cards from a validated preview
+      parameters:
+        - { name: participantId, in: path, required: true, schema: { type: number } }
+        - { name: seasonId, in: path, required: true, schema: { type: number } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinancialSubscriptionImportConfirm"
+      responses:
+        "200": { description: Offers replaced, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialImportResult" } } } }
+        "409": { description: Season changed after preview }
+  /admin/financial/participants/{participantId}/seasons/{seasonId}/imports/schedule/template:
+    get:
+      operationId: downloadAdminFinancialScheduleImportTemplate
+      tags: [financial]
+      summary: Download a season-specific schedule XLSX template
+      parameters:
+        - { name: participantId, in: path, required: true, schema: { type: number } }
+        - { name: seasonId, in: path, required: true, schema: { type: number } }
+      responses:
+        "200": { description: Schedule template, content: { application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: { schema: { type: string, format: binary } } } }
+        "404": { description: Participant or season not found }
+        "422": { description: The season has no locations }
+  /admin/financial/participants/{participantId}/seasons/{seasonId}/imports/schedule/preview:
+    post:
+      operationId: previewAdminFinancialScheduleImport
+      tags: [financial]
+      summary: Validate and preview a season-specific schedule XLSX import
+      parameters:
+        - { name: participantId, in: path, required: true, schema: { type: number } }
+        - { name: seasonId, in: path, required: true, schema: { type: number } }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/FinancialImportFileInput"
+      responses:
+        "200": { description: Valid schedule import preview, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialScheduleImportPreview" } } } }
+        "422": { description: Import validation errors, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialScheduleImportPreview" } } } }
+  /admin/financial/participants/{participantId}/seasons/{seasonId}/imports/schedule/confirm:
+    post:
+      operationId: confirmAdminFinancialScheduleImport
+      tags: [financial]
+      summary: Atomically replace a season schedule from a validated preview
+      parameters:
+        - { name: participantId, in: path, required: true, schema: { type: number } }
+        - { name: seasonId, in: path, required: true, schema: { type: number } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinancialScheduleImportConfirm"
+      responses:
+        "200": { description: Schedule replaced, content: { application/json: { schema: { $ref: "#/components/schemas/FinancialImportResult" } } } }
+        "409": { description: Season or master data changed after preview }
+components:
+  schemas:
+    FinancialFileSubmissionInput:
+      type: object
+      required: [fileType, filename, sizeBytes]
+      properties:
+        fileType: { type: string, enum: [teachers, subscriptions] }
+        filename: { type: string, minLength: 1, maxLength: 255 }
+        sizeBytes: { type: number, minimum: 1, maximum: 10485760, multipleOf: 1 }
+    FinancialFileSubmissionConfirmation:
+      type: object
+      required: [fileType, filename, objectPath, sizeBytes]
+      properties:
+        fileType: { type: string, enum: [teachers, subscriptions] }
+        filename: { type: string, minLength: 1, maxLength: 255 }
+        objectPath: { type: string, minLength: 1 }
+        sizeBytes: { type: number, minimum: 1, maximum: 10485760, multipleOf: 1 }
+    FinancialFileSubmissionUpload:
+      type: object
+      required: [uploadUrl, objectPath]
+      properties:
+        uploadUrl: { type: string }
+        objectPath: { type: string }
+    FinancialFileSubmission:
+      type: object
+      required: [id, seasonId, seasonName, fileType, filename, sizeBytes, status, submittedAt, downloadUrl]
+      properties:
+        id: { type: number }
+        seasonId: { type: number }
+        seasonName: { type: string }
+        fileType: { type: string, enum: [teachers, subscriptions] }
+        filename: { type: string }
+        sizeBytes: { type: number }
+        status: { type: string, enum: [open, in_progress, processed] }
+        submittedAt: { type: string, format: date-time }
+        downloadUrl: { type: string }
+    FinancialFileSubmissionStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [open, in_progress, processed] }
+    AdminFinancialFileSubmission:
+      allOf:
+        - $ref: "#/components/schemas/FinancialFileSubmission"
+        - type: object
+          required: [participantId, schoolName, statusChangedAt, statusChangedBy, notificationAttemptedAt, notificationSentAt, notificationError]
+          properties:
+            participantId: { type: number }
+            schoolName: { type: string }
+            statusChangedAt:
+              type: ["string", "null"]
+              format: date-time
+              description: Moment van de laatste statuswijziging door een beheerder; null voor bestaande of nog niet behandelde aanleveringen.
+            statusChangedBy:
+              type: ["string", "null"]
+              description: Zichtbare naam van de beheerder die de status het laatst wijzigde; null voor bestaande of nog niet behandelde aanleveringen.
+            notificationAttemptedAt:
+              type: ["string", "null"]
+              format: date-time
+              description: Moment waarop de eenmalige melding bij verwerkt is geprobeerd.
+            notificationSentAt:
+              type: ["string", "null"]
+              format: date-time
+              description: Moment waarop de melding succesvol is verstuurd.
+            notificationError:
+              type: ["string", "null"]
+              description: Fout bij de meldpoging, zichtbaar voor beheer.
+    FinancialImportFileInput:
+      type: object
+      required: [file]
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Een .xlsx-bestand; bytes worden alleen tijdens de preview verwerkt.
+    FinancialImportResult:
+      type: object
+      required: [importedCount, updatedAt]
+      properties:
+        importedCount: { type: number, minimum: 0 }
+        updatedAt: { type: string, format: date-time }
+    FinancialImportPreviewBase:
+      type: object
+      required: [valid, expectedUpdatedAt, existingCount, newCount, errors]
+      properties:
+        valid: { type: boolean }
+        expectedUpdatedAt: { type: string, format: date-time }
+        existingCount: { type: number, minimum: 0 }
+        newCount: { type: number, minimum: 0 }
+        errors: { type: array, items: { type: string } }
+    FinancialTeacherImportRow:
+      type: object
+      required: [name, hourlyRate, weeklyTravel]
+      properties:
+        name: { type: string }
+        hourlyRate: { type: number, minimum: 0 }
+        weeklyTravel: { type: number, minimum: 0 }
+    FinancialSubscriptionImportRow:
+      allOf:
+        - $ref: "#/components/schemas/FinancialSubscriptionInput"
+    FinancialTeacherImportPreview:
+      allOf:
+        - $ref: "#/components/schemas/FinancialImportPreviewBase"
+        - type: object
+          required: [rows]
+          properties:
+            rows: { type: array, items: { $ref: "#/components/schemas/FinancialTeacherImportRow" } }
+    FinancialSubscriptionImportPreview:
+      allOf:
+        - $ref: "#/components/schemas/FinancialImportPreviewBase"
+        - type: object
+          required: [rows]
+          properties:
+            rows: { type: array, items: { $ref: "#/components/schemas/FinancialSubscriptionImportRow" } }
+    FinancialTeacherImportConfirm:
+      type: object
+      required: [expectedUpdatedAt, rows]
+      properties:
+        expectedUpdatedAt: { type: string, format: date-time }
+        rows: { type: array, items: { $ref: "#/components/schemas/FinancialTeacherImportRow" } }
+    FinancialSubscriptionImportConfirm:
+      type: object
+      required: [expectedUpdatedAt, rows]
+      properties:
+        expectedUpdatedAt: { type: string, format: date-time }
+        rows: { type: array, items: { $ref: "#/components/schemas/FinancialSubscriptionImportRow" } }
+    FinancialScheduleImportRow:
+      type: object
+      required: [name, teacherId, teacherLabel, locationId, locationLabel, weekday, weekdayLabel, startTime, durationMinutes, activeFrom, activeUntil]
+      properties:
+        name: { type: string, minLength: 1 }
+        teacherId: { type: ["number", "null"] }
+        teacherLabel: { type: string }
+        locationId: { type: number, minimum: 1 }
+        locationLabel: { type: string }
+        weekday: { type: number, minimum: 0, maximum: 6, multipleOf: 1 }
+        weekdayLabel: { type: string }
+        startTime: { type: string }
+        durationMinutes: { type: number, minimum: 1, multipleOf: 1 }
+        activeFrom: { type: string, format: date }
+        activeUntil: { type: string, format: date }
+    FinancialScheduleImportMetadata:
+      type: object
+      required: [participantId, seasonId, seasonName, templateVersion, masterDataVersion]
+      properties:
+        participantId: { type: number, minimum: 1 }
+        seasonId: { type: number, minimum: 1 }
+        seasonName: { type: string }
+        templateVersion: { type: string }
+        masterDataVersion: { type: string, format: date-time }
+    FinancialScheduleImportPreview:
+      allOf:
+        - $ref: "#/components/schemas/FinancialImportPreviewBase"
+        - type: object
+          required: [metadata, rows]
+          properties:
+            metadata: { $ref: "#/components/schemas/FinancialScheduleImportMetadata" }
+            rows: { type: array, items: { $ref: "#/components/schemas/FinancialScheduleImportRow" } }
+    FinancialScheduleImportConfirm:
+      type: object
+      required: [expectedUpdatedAt, participantId, seasonId, templateVersion, masterDataVersion, rows]
+      properties:
+        expectedUpdatedAt: { type: string, format: date-time }
+        participantId: { type: number, minimum: 1 }
+        seasonId: { type: number, minimum: 1 }
+        templateVersion: { type: string }
+        masterDataVersion: { type: string, format: date-time }
+        rows: { type: array, items: { $ref: "#/components/schemas/FinancialScheduleImportRow" } }
+    FinancialSeason:
+      type: object
+      required: [id, name, startDate, endDate, country, hasStarterDeduction, defaultSalary, updatedAt]
+      properties:
+        id: { type: number }
+        name: { type: string }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        country: { type: string, enum: [Nederland, België] }
+        hasStarterDeduction: { type: boolean }
+        defaultSalary: { type: number }
+        updatedAt: { type: string, format: date-time }
+    FinancialSeasonInput:
+      type: object
+      required: [name, startDate, endDate, country, hasStarterDeduction, defaultSalary, teachers, locations, subscriptions, lessons, closures]
+      properties:
+        name: { type: string, minLength: 1 }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        country: { type: string, enum: [Nederland, België] }
+        hasStarterDeduction: { type: boolean }
+        defaultSalary: { type: number, minimum: 0 }
+        teachers: { type: array, items: { $ref: "#/components/schemas/FinancialTeacherInput" } }
+        locations: { type: array, items: { $ref: "#/components/schemas/FinancialLocationInput" } }
+        subscriptions: { type: array, items: { $ref: "#/components/schemas/FinancialSubscriptionInput" } }
+        lessons: { type: array, items: { $ref: "#/components/schemas/FinancialLessonInput" } }
+        closures: { type: array, items: { $ref: "#/components/schemas/FinancialClosureInput" } }
+    FinancialSeasonUpdateInput:
+      allOf:
+        - $ref: "#/components/schemas/FinancialSeasonInput"
+        - type: object
+          required: [expectedUpdatedAt]
+          properties:
+            expectedUpdatedAt: { type: string, format: date-time }
+    FinancialTeacherInput:
+      type: object
+      required: [name, hourlyRate, weeklyTravel]
+      properties: { id: { type: number }, clientId: { type: string, minLength: 1 }, name: { type: string }, hourlyRate: { type: number, minimum: 0 }, weeklyTravel: { type: number, minimum: 0 } }
+    FinancialLocationInput:
+      type: object
+      required: [name, rentFrequency, rent, sessionMinutes]
+      properties: { id: { type: number }, clientId: { type: string, minLength: 1 }, name: { type: string }, rentFrequency: { type: string, enum: [hour, month, session] }, rent: { type: number, minimum: 0 }, rentTermCount: { type: ["number", "null"], minimum: 1, multipleOf: 1 }, sessionMinutes: { type: ["number", "null"] } }
+    FinancialSubscriptionInput:
+      type: object
+      required: [name, audience, productType, paymentFrequency, price, installmentCount, durationMonths, rideCount, validityMonths, vatRate]
+      properties:
+        id: { type: number }
+        name: { type: string, minLength: 1 }
+        audience: { type: string, enum: [youth, adult] }
+        productType: { type: string, enum: [subscription, punch_card] }
+        paymentFrequency: { type: string, enum: [monthly, four_weekly, quarterly, half_yearly, yearly, installments, one_time] }
+        price: { type: number, minimum: 0 }
+        installmentCount: { type: ["number", "null"], minimum: 1, multipleOf: 1 }
+        durationMonths: { type: ["number", "null"], minimum: 1, multipleOf: 1 }
+        rideCount: { type: ["number", "null"], minimum: 1, multipleOf: 1 }
+        validityMonths: { type: ["number", "null"], minimum: 1, multipleOf: 1 }
+        vatRate: { type: number, minimum: 0 }
+    FinancialLessonInput:
+      type: object
+      required: [name, weekday, startTime, durationMinutes, activeFrom, activeUntil]
+      properties: { id: { type: number }, teacherId: { type: ["number", "null"] }, teacherClientId: { type: ["string", "null"], minLength: 1 }, locationId: { type: ["number", "null"] }, locationClientId: { type: ["string", "null"], minLength: 1 }, name: { type: string }, weekday: { type: number, minimum: 0, maximum: 6 }, startTime: { type: string }, durationMinutes: { type: number, minimum: 1 }, activeFrom: { type: string, format: date }, activeUntil: { type: string, format: date } }
+    FinancialClosureInput:
+      type: object
+      required: [name, startDate, endDate]
+      properties: { id: { type: number }, name: { type: string }, startDate: { type: string, format: date }, endDate: { type: string, format: date } }
+    FinancialSeasonDetail:
+      allOf:
+        - $ref: "#/components/schemas/FinancialSeason"
+        - type: object
+          required: [teachers, locations, subscriptions, lessons, closures, months, costTrends, lessonSeasonForecast]
+          properties:
+            teachers: { type: array, items: { $ref: "#/components/schemas/FinancialTeacherInput" } }
+            locations: { type: array, items: { $ref: "#/components/schemas/FinancialLocationInput" } }
+            subscriptions: { type: array, items: { $ref: "#/components/schemas/FinancialSubscriptionInput" } }
+            lessons: { type: array, items: { $ref: "#/components/schemas/FinancialLessonInput" } }
+            closures: { type: array, items: { $ref: "#/components/schemas/FinancialClosureInput" } }
+            months: { type: array, items: { $ref: "#/components/schemas/FinancialMonthDetail" } }
+            costTrends:
+              type: array
+              items:
+                type: object
+                required: [category, total, change, changePercentage, monthlyAmounts]
+                properties:
+                  category: { type: string }
+                  total: { type: number }
+                  change: { type: number }
+                  changePercentage: { type: ["number", "null"] }
+                  monthlyAmounts:
+                    type: array
+                    items:
+                      type: object
+                      required: [month, amount]
+                      properties:
+                        month: { type: string, format: date }
+                        amount: { type: number }
+            lessonSeasonForecast:
+              $ref: "#/components/schemas/FinancialLessonSeasonForecast"
+    FinancialMonthInput:
+      type: object
+      required: [expectedUpdatedAt, contributionRevenue, taxArrears, fixedCosts, activities, lessonInputs]
+      properties:
+        expectedUpdatedAt: { type: ["string", "null"], format: date-time }
+        contributionRevenue: { type: number, minimum: 0 }
+        taxArrears: { type: number, minimum: 0 }
+        salaryOverride: { type: ["number", "null"], minimum: 0 }
+        fixedCosts:
+          type: array
+          items: { type: object, required: [group, description, frequency, amount], properties: { group: { type: string }, description: { type: string }, frequency: { type: string, enum: [monthly, yearly, one_time] }, amount: { type: number } } }
+        activities:
+          type: array
+          items: { type: object, required: [name, amount], properties: { name: { type: string }, amount: { type: number } } }
+        lessonInputs:
+          type: array
+          items: { type: object, required: [lessonId], properties: { lessonId: { type: number }, attendance: { type: ["number", "null"] }, lessonCountOverride: { type: ["number", "null"], minimum: 0 } } }
+    FinancialMonthDetail:
+      type: object
+      required: [month, isSaved, updatedAt, contributionRevenue, taxArrears, salaryOverride, revenue, costs, grossProfit, taxReserve, netProfit, salary, bankBalance, fixedCosts, previousMonth, previousMonthFixedCosts, activities, lessonInputs, lessonProfitability, cumulative]
+      properties:
+        month: { type: string, format: date }
+        isSaved: { type: boolean }
+        updatedAt: { type: ["string", "null"], format: date-time }
+        contributionRevenue: { type: number }
+        taxArrears: { type: number }
+        salaryOverride: { type: ["number", "null"] }
+        revenue: { type: number }
+        costs: { type: number }
+        grossProfit: { type: number }
+        taxReserve: { type: number }
+        netProfit: { type: number }
+        salary: { type: number }
+        bankBalance: { type: number }
+        fixedCosts: { type: array, items: { type: object, required: [group, description, frequency, amount], properties: { group: { type: string }, description: { type: string }, frequency: { type: string, enum: [monthly, yearly, one_time] }, amount: { type: number } } } }
+        previousMonth: { type: ["string", "null"], format: date }
+        previousMonthFixedCosts: { type: array, items: { type: object, required: [group, description, frequency, amount], properties: { group: { type: string }, description: { type: string }, frequency: { type: string, enum: [monthly, yearly, one_time] }, amount: { type: number } } } }
+        activities: { type: array, items: { type: object, required: [name, amount], properties: { name: { type: string }, amount: { type: number } } } }
+        lessonInputs: { type: array, items: { type: object, required: [lessonId, attendanceSourceMonth], properties: { lessonId: { type: number }, attendance: { type: ["number", "null"] }, attendanceSourceMonth: { type: ["string", "null"], format: date }, lessonCountOverride: { type: ["number", "null"] } } } }
+        lessonProfitability:
+          type: array
+          items:
+            type: object
+            required: [lessonId, lessonName, locationId, locationName, autoCount, effectiveCount, attendance, lessonCost, locationRentCost, locationRentCalculation, estimatedRevenue, estimatedProfit, breakEvenAttendance, promotionGap, status]
+            properties:
+              lessonId: { type: number }
+              lessonName: { type: string }
+              locationId: { type: ["number", "null"] }
+              locationName: { type: ["string", "null"] }
+              autoCount: { type: number }
+              effectiveCount: { type: number }
+              attendance: { type: ["number", "null"] }
+              lessonCost: { type: number }
+              locationRentCost: { type: number }
+              locationRentCalculation:
+                oneOf:
+                  - $ref: "#/components/schemas/FinancialLessonRentCalculation"
+                  - type: "null"
+              estimatedRevenue: { type: number }
+              estimatedProfit: { type: ["number", "null"] }
+              breakEvenAttendance: { type: ["number", "null"] }
+              promotionGap: { type: ["number", "null"] }
+              status: { type: string, enum: [unknown, loss, healthy] }
+        cumulative: { type: object, properties: { revenue: { type: number }, costs: { type: number }, grossProfit: { type: number }, taxReserve: { type: number }, netProfit: { type: number }, bankBalance: { type: number } } }
+    FinancialTaxYearInput:
+      type: object
+      required: [expectedUpdatedAt, preliminaryPayments]
+      properties:
+        expectedUpdatedAt: { type: ["string", "null"], format: date-time }
+        preliminaryPayments: { type: number, minimum: 0 }
+    FinancialTaxYearSummary:
+      type: object
+      required: [calendarYear, calculationVersion, country, hasCountryConflict, grossProfit, estimatedTax, effectiveReservePercentage, preliminaryPayments, extraToSave, coveredMonths, missingMonths, isComplete, updatedAt]
+      properties:
+        calendarYear: { type: number }
+        calculationVersion: { type: string }
+        country: { type: ["string", "null"], enum: [Nederland, België, null] }
+        hasCountryConflict: { type: boolean }
+        grossProfit: { type: number }
+        estimatedTax: { type: number }
+        effectiveReservePercentage: { type: number }
+        preliminaryPayments: { type: number }
+        extraToSave: { type: number }
+        coveredMonths: { type: array, items: { type: string, format: date } }
+        missingMonths: { type: array, items: { type: string, format: date } }
+        isComplete: { type: boolean }
+        updatedAt: { type: ["string", "null"], format: date-time }
+    FinancialLessonSeasonForecast:
+      type: object
+      required: [months, lessons, unallocatedLocations, overallocatedLocations, locationRentBreakdowns]
+      properties:
+        months:
+          type: array
+          items: { type: string, format: date }
+        lessons:
+          type: array
+          items:
+            type: object
+            required: [lessonId, lessonName, totalLessonCount, totalRevenue, totalCost, totalLocationRentCost, locationRentCalculation, totalProfit, actualMonthCount, forecastMonthCount, unknownMonthCount, promotionGap, status, months]
+            properties:
+              lessonId: { type: number }
+              lessonName: { type: string }
+              totalLessonCount: { type: number }
+              totalRevenue: { type: ["number", "null"] }
+              totalCost: { type: number }
+              totalLocationRentCost: { type: number }
+              locationRentCalculation:
+                oneOf:
+                  - $ref: "#/components/schemas/FinancialLessonRentCalculation"
+                  - type: "null"
+              totalProfit: { type: ["number", "null"] }
+              actualMonthCount: { type: number }
+              forecastMonthCount: { type: number }
+              unknownMonthCount: { type: number }
+              promotionGap: { type: ["number", "null"] }
+              status: { type: string, enum: [unknown, loss, healthy] }
+              months:
+                type: array
+                items:
+                  type: object
+                  required: [month, status, missingInputs, saved, lessonCount, attendance, revenue, cost, locationRentCost, locationRentCalculation, profit, breakEvenAttendance, promotionGap]
+                  properties:
+                    month: { type: string, format: date }
+                    status: { type: string, enum: [actual, forecast, unknown, no_lessons] }
+                    missingInputs:
+                      type: array
+                      items: { type: string, enum: [contribution, attendance] }
+                    saved: { type: boolean }
+                    lessonCount: { type: number }
+                    attendance: { type: ["number", "null"] }
+                    revenue: { type: ["number", "null"] }
+                    cost: { type: number }
+                    locationRentCost: { type: number }
+                    locationRentCalculation:
+                      oneOf:
+                        - $ref: "#/components/schemas/FinancialLessonRentCalculation"
+                        - type: "null"
+                    profit: { type: ["number", "null"] }
+                    breakEvenAttendance: { type: ["number", "null"] }
+                    promotionGap: { type: ["number", "null"] }
+        unallocatedLocations:
+          type: array
+          items:
+            type: object
+            required: [locationId, locationName, totalCost]
+            properties:
+              locationId: { type: number }
+              locationName: { type: string }
+              totalCost: { type: number }
+        overallocatedLocations:
+          type: array
+          items:
+            type: object
+            required: [locationId, locationName, previouslyAllocatedCost, contractTotal]
+            properties:
+              locationId: { type: number }
+              locationName: { type: string }
+              previouslyAllocatedCost: { type: number }
+              contractTotal: { type: number }
+        locationRentBreakdowns:
+          type: array
+          items:
+            type: object
+            required: [locationId, locationName, rentPerTerm, rentTermCount, contractTotal, scheduledLessonCount, allocatedCost, previouslyAllocatedCost, remainingAllocatedCost, unallocatedCost, remainingScheduledLessonCount, lessons]
+            properties:
+              locationId: { type: number }
+              locationName: { type: string }
+              rentPerTerm: { type: number }
+              rentTermCount: { type: number }
+              contractTotal: { type: number }
+              scheduledLessonCount: { type: number }
+              allocatedCost: { type: number }
+              previouslyAllocatedCost: { type: number }
+              remainingAllocatedCost: { type: number }
+              unallocatedCost: { type: number }
+              remainingScheduledLessonCount: { type: number }
+              lessons:
+                type: array
+                items:
+                  type: object
+                  required: [lessonId, lessonName, scheduledLessonCount, allocatedCost]
+                  properties:
+                    lessonId: { type: number }
+                    lessonName: { type: string }
+                    scheduledLessonCount: { type: number }
+                    allocatedCost: { type: number }
+    FinancialLessonRentCalculation:
+      type: object
+      required: [frequency, rate, durationMinutes, lessonCount, totalCost]
+      properties:
+        frequency: { type: string, enum: [hour, session] }
+        rate: { type: number }
+        durationMinutes: { type: ["number", "null"] }
+        lessonCount: { type: number }
+        totalCost: { type: number }
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    Challenge:
+      type: object
+      required: [id, name, startDate, endDate, totalDays, daysRemaining]
+      properties:
+        id: { type: number }
+        name: { type: string }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        totalDays: { type: number }
+        daysRemaining: { type: number }
+        currentDay: { type: number }
+        currentWeek: { type: number }
+        totalWeeks: { type: number }
+        isActive: { type: boolean }
+    ChallengeUpdate:
+      type: object
+      required: [startDate, endDate]
+      properties:
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+    ChallengeWeek:
+      type: object
+      required: [weekNumber, label, startDate, endDate]
+      properties:
+        weekNumber: { type: number }
+        label: { type: string }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        isCurrent: { type: boolean }
+        isPast: { type: boolean }
+    WeeklyEntry:
+      type: object
+      required: [id, weekNumber, signups, attendance, enrolled, updatedAt]
+      properties:
+        id: { type: number }
+        weekNumber: { type: number }
+        signups: { type: number }
+        attendance: { type: number }
+        enrolled: { type: number }
+        updatedAt: { type: string, format: date-time }
+    WeeklyEntryInput:
+      type: object
+      required: [weekNumber, signups, attendance, enrolled]
+      properties:
+        weekNumber: { type: number, minimum: 1 }
+        signups: { type: number, minimum: 0 }
+        attendance: { type: number, minimum: 0 }
+        enrolled: { type: number, minimum: 0 }
+    ProfileUpdate:
+      type: object
+      minProperties: 1
+      required: [revision]
+      properties:
+        startingMembers: { type: number, minimum: 1 }
+        targetNewMembers: { type: number, minimum: 1 }
+        revision: { type: number, minimum: 1 }
+    ProfilePreferences:
+      type: object
+      required: [masterDataRoute]
+      properties:
+        masterDataRoute:
+          type: ["string", "null"]
+          enum: [manual, excel, null]
+    ProfilePreferencesUpdate:
+      type: object
+      required: [masterDataRoute]
+      properties:
+        masterDataRoute:
+          type: string
+          enum: [manual, excel]
+    CoachMessage:
+      type: object
+      required: [id, participantId, authorName, body, createdAt]
+      properties:
+        id: { type: number }
+        participantId: { type: number }
+        authorName: { type: string }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+    MessageInput:
+      type: object
+      required: [body]
+      properties:
+        body: { type: string, minLength: 1, maxLength: 2000 }
+    EmailSendResult:
+      type: object
+      required: [success, message]
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+    WeeklyEntryUpdate:
+      type: object
+      properties:
+        signups: { type: number, minimum: 0 }
+        attendance: { type: number, minimum: 0 }
+        enrolled: { type: number, minimum: 0 }
+    AdminWeeklyEntry:
+      type: object
+      required: [id, participantId, schoolName, weekNumber, signups, attendance, enrolled, updatedAt]
+      properties:
+        id: { type: number }
+        participantId: { type: number }
+        schoolName: { type: string }
+        weekNumber: { type: number }
+        signups: { type: number }
+        attendance: { type: number }
+        enrolled: { type: number }
+        updatedAt: { type: string, format: date-time }
+    Dashboard:
+      type: object
+      required: [participant, challenge, totals, scores, entries]
+      properties:
+        participant:
+          $ref: "#/components/schemas/Participant"
+        challenge:
+          $ref: "#/components/schemas/Challenge"
+        totals:
+          $ref: "#/components/schemas/Totals"
+        scores:
+          $ref: "#/components/schemas/Scores"
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/WeeklyEntry"
+    AdminParticipantView:
+      type: object
+      required: [participant, challenge, totals, scores, entries, weeks, messages]
+      properties:
+        participant:
+          $ref: "#/components/schemas/Participant"
+        challenge:
+          $ref: "#/components/schemas/Challenge"
+        totals:
+          $ref: "#/components/schemas/Totals"
+        scores:
+          $ref: "#/components/schemas/Scores"
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/WeeklyEntry"
+        weeks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChallengeWeek"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoachMessage"
+    Totals:
+      type: object
+      required: [signups, attendance, enrolled]
+      properties:
+        signups: { type: number }
+        attendance: { type: number }
+        enrolled: { type: number }
+    Scores:
+      type: object
+      required: [growthPercent, conversionPercent, attendancePercent]
+      properties:
+        growthPercent: { type: number }
+        conversionPercent: { type: number }
+        attendancePercent: { type: number }
+    LeaderboardEntry:
+      type: object
+      required: [rank, schoolName, contactName, country, growthPercent, conversionPercent, enrolled]
+      properties:
+        rank: { type: number }
+        schoolName: { type: string }
+        contactName: { type: string }
+        country: { type: string, enum: [Nederland, België] }
+        growthPercent: { type: number }
+        conversionPercent: { type: number }
+        enrolled: { type: number }
+        isCurrentUser: { type: boolean }
+    Participant:
+      type: object
+      required: [id, schoolName, contactName, email, startingMembers, targetNewMembers, country, revision, updatedAt, totals, scores]
+      properties:
+        id: { type: number }
+        schoolName: { type: string }
+        contactName: { type: string }
+        email: { type: string }
+        startingMembers: { type: ["number", "null"] }
+        targetNewMembers: { type: ["number", "null"] }
+        country: { type: string, enum: [Nederland, België] }
+        revision: { type: number, minimum: 1 }
+        updatedAt: { type: string, format: date-time }
+        totals:
+          $ref: "#/components/schemas/Totals"
+        scores:
+          $ref: "#/components/schemas/Scores"
+    ParticipantRecoveryRecord:
+      type: object
+      required: [releaseId, participantId, waitingMinutes]
+      properties:
+        releaseId: { type: number }
+        participantId: { type: number }
+        waitingMinutes: { type: number }
+    ParticipantRecoveryStatus:
+      type: object
+      required: [overdueCount, records]
+      properties:
+        overdueCount: { type: number }
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParticipantRecoveryRecord"
+    ParticipantInput:
+      type: object
+      required: [schoolName, contactName, email, country]
+      properties:
+        schoolName: { type: string, minLength: 1 }
+        contactName: { type: string, minLength: 1 }
+        email:
+          type: string
+          description: Participant email; surrounding whitespace is normalized and the value must contain a local part and a dotted domain
+        country: { type: string, enum: [Nederland, België] }
+    ParticipantImportFileInput:
+      type: object
+      required: [file]
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Een .xlsx-bestand; bytes worden alleen tijdens de controle en import verwerkt.
+    ParticipantImportRow:
+      type: object
+      required: [row, schoolName, contactName, email, country]
+      properties:
+        row: { type: number }
+        schoolName: { type: string }
+        contactName: { type: string }
+        email: { type: string }
+        country: { type: string }
+    ParticipantImportIssue:
+      type: object
+      required: [row, column, participant, message]
+      properties:
+        row: { type: number }
+        column: { type: string }
+        participant: { type: string }
+        message: { type: string }
+    ParticipantImportPreview:
+      type: object
+      required: [valid, rows, issues]
+      properties:
+        valid: { type: boolean }
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParticipantImportRow"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParticipantImportIssue"
+    ParticipantImportResult:
+      type: object
+      required: [importedCount]
+      properties:
+        importedCount: { type: number }
+    ParticipantUpdate:
+      type: object
+      required: [revision]
+      properties:
+        schoolName: { type: string, minLength: 1 }
+        contactName: { type: string, minLength: 1 }
+        email:
+          type: string
+          description: Participant email; surrounding whitespace is normalized and the value must contain a local part and a dotted domain
+        startingMembers: { type: number, minimum: 1 }
+        targetNewMembers: { type: number, minimum: 1 }
+        country: { type: string, enum: [Nederland, België] }
+        revision: { type: number, minimum: 1 }
