@@ -1,0 +1,41 @@
+{
+  "name": "@workspace/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "default": "./src/schema/index.ts"
+    },
+    "./email-whitespace": {
+      "types": "./src/emailWhitespace.d.mts",
+      "default": "./src/emailWhitespace.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build --force",
+    "check-exports": "node ./scripts/check-exports.mjs",
+    "check-schema": "node --experimental-strip-types ./scripts/check-schema.mjs",
+    "test:push-preflight": "node --test ./scripts/push-with-preflight.unit.test.mjs",
+    "test:push-preflight:integration": "node ./scripts/run-push-preflight-integration.mjs",
+    "test:push-preflight:runner": "node --test ./scripts/run-push-preflight-integration.test.mjs",
+    "push": "node ./scripts/push-with-preflight.mjs",
+    "push-force": "node ./scripts/push-with-preflight.mjs --force"
+  },
+  "dependencies": {
+    "drizzle-orm": "catalog:",
+    "drizzle-zod": "^0.8.3",
+    "pg": "^8.22.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pg": "^8.20.0",
+    "drizzle-kit": "^0.31.10"
+  }
+}
