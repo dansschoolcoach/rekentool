@@ -1,0 +1,14 @@
+{
+  "name": "@workspace/api-spec",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "codegen": "pnpm run test:codegen && node ./scripts/run-atomic-codegen.mjs",
+    "check:codegen": "pnpm run test:codegen && node ./scripts/run-atomic-codegen.mjs --check",
+    "test:codegen": "node --test ./scripts/normalize-api-zod-exports.test.mjs ./scripts/run-atomic-codegen.test.mjs",
+    "test:codegen:windows": "node -e \"if (process.platform !== 'win32') { console.error('Windows codegen tests require win32.'); process.exit(1); }\" && node --test ./scripts/normalize-api-zod-exports.test.mjs ./scripts/run-atomic-codegen.test.mjs"
+  },
+  "devDependencies": {
+    "orval": "^8.23.0"
+  }
+}
