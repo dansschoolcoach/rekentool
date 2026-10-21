@@ -1,0 +1,49 @@
+name: Check main branch protection
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/check-branch-protection.yml"
+      - ".github/workflows/test-windows-codegen.yml"
+      - "scripts/check-github-branch-protection.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-main-branch-protection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GITHUB_BRANCH: main
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Test the branch protection checker
+        run: node --test scripts/check-github-branch-protection.test.mjs
+
+      - name: Check branch protection token configuration
+        env:
+          BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_TOKEN }}
+        run: |
+          if [ -z "$BRANCH_PROTECTION_TOKEN" ]; then
+            echo "::error::The BRANCH_PROTECTION_TOKEN repository secret is not configured."
+            exit 1
+          fi
+
+      - name: Verify required checks on main
+        env:
+          GITHUB_TOKEN: ${{ secrets.BRANCH_PROTECTION_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/check-github-branch-protection.mjs
