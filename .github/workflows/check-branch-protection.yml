@@ -12,6 +12,8 @@ on:
       - ".github/workflows/test-windows-codegen.yml"
       - "scripts/check-github-branch-protection.mjs"
 
+# BRANCH_PROTECTION_TOKEN must be a GitHub App or fine-grained token with
+# repository Administration: Read permission. See .github/workflows/README.md.
 permissions:
   contents: read
 
