@@ -1,0 +1,22 @@
+name: Test Windows code generation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  windows-codegen:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Run code generation tests on Windows
+        working-directory: lib/api-spec
+        run: node --run test:codegen:windows
